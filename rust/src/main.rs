@@ -22,6 +22,19 @@ struct SendResult {
     txid: String,
 }
 
+fn send(rpc: &Client, addr: &str) -> bitcoincore_rpc::Result<String> {
+    let args = [
+        json!({addr : 100 }), // recipient address
+        json!(null),          // conf target
+        json!(null),          // estimate mode
+        json!(null),          // fee rate in sats/vb
+        json!({}),            // Empty option object
+    ];
+
+    let send_result = rpc.call::<SendResult>("send", &args)?;
+    assert!(send_result.complete);
+    Ok(send_result.txid)
+}
 
 #[allow(clippy::too_many_lines)]
 fn main() -> bitcoincore_rpc::Result<()> {
