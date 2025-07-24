@@ -1,16 +1,15 @@
 # Setup nvm and install pre-req
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+export NVM_DIR="$HOME/.nvm"
+source "$NVM_DIR/nvm.sh"
 nvm install --lts
 npm install
 
 set -e  # Exit immediately if any command fails
 
-# Spawn Bitcoind, and provide execution permission.
-docker compose up -d
-sleep 10
+echo "Waiting for local bitcoind to be fully initialized..."
 
-echo "Waiting for bitcoind to be fully initialized..."
-
+# Wait until your local bitcoind is ready
 while true; do
   result=$(curl --silent --user alice:password --data-binary \
     '{"jsonrpc":"1.0","id":"ping","method":"getblockchaininfo","params":[]}' \
@@ -25,12 +24,10 @@ while true; do
   fi
 done
 
+# Ensure scripts are executable
 chmod +x ./rust/run-rust.sh
 chmod +x ./run.sh
 
-# Run the test scripts
+# Run your tests
 /bin/bash run.sh
 npm run test
-
-# Stop the docker.
-docker compose down -v
